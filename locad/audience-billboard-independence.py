@@ -80,30 +80,42 @@ except:
 	# print("[INFO] no approx. completion time can be provided")
 	total = -1
 
-
 fps = FPS().start()
 data = []
+
+temp_time = 1
+
+tz_INDIA = pytz.timezone('Asia/Kolkata')
+date_data = datetime.now(tz_INDIA) 
+day = date_data.day
+hour = date_data.hour
+minute = date_data.minute
 
 
 # loop over frames from the video file stream
 while True:
 
+	# tz_INDIA = pytz.timezone('Asia/Kolkata')  
+	datetime_INDIA = datetime.now(tz_INDIA) 
+	if (datetime_INDIA.year == 2021) and (datetime_INDIA.month == 12):
+		print(f"Your license period has expired")
+		break 
+
+	# print(f"BEGINNING: The temp time is {temp_time}")
+	if datetime_INDIA.hour!=temp_time:
+		data=[]
+	
+	# print(f"The data is {data}")
+
 	try:
 		# read the next frame from the file
 		(grabbed, frame) = vs.read()
 
-		tz_INDIA = pytz.timezone('Asia/Kolkata')  
-		datetime_INDIA = datetime.now(tz_INDIA) 
-		# print(f"The date in India is {datetime_INDIA.year}")
-
-		if (datetime_INDIA.year == 2021) and (datetime_INDIA.month == 12):
-			print(f"Your license period has expired")
-			break 
-
 		# if the frame was not grabbed, then we have reached the end
-		# of the stream
+		# of the stream. Continue the program for the next iteration.
 		if not grabbed:
-			break
+			print(f"There is no grabbing of frames")
+			continue
 
 		# if the frame dimensions are empty, grab them
 		if W is None or H is None:
@@ -168,7 +180,6 @@ while True:
 			# print(f"The idxs are {idxs} and type is {type(idxs)} ")
 			# print(f"The flattened idxs are {idxs.flatten()} and type is {type(idxs.flatten())} ")
 
-
 			# ensure at least one detection exists
 			if len(idxs) > 0:
 				# loop over the indexes we are keeping
@@ -186,17 +197,22 @@ while True:
 					data.append(LABELS[classIDs[i]])
 					data_c = Counter(data)
 					data_c = {k: v for k, v in data_c.items() if k in "cars" or k in "truck" or k in "bus" or k in "person" or k in "motorbike"}
-					# print(f"The data is {data_c}")
+					print(f"The data is {data_c}")
 					# tz_INDIA = pytz.timezone('Asia/Kolkata')  
 					# datetime_INDIA = datetime.now(tz_INDIA) 
 					# calculations[datetime_INDIA.day] = {datetime_INDIA.hour: data_c}
 					calculations_hour[datetime_INDIA.hour] = data_c
 					calculations[datetime_INDIA.day] = calculations_hour
+					# calculations_minute[datetime_INDIA.minute] = data_c
+					# calculations[datetime_INDIA.day] = calculations_minute
 					print(f"OTS count: {calculations}")
-					pickle.dump(calculations, open('ots_count.p', 'wb'))
+					pickle.dump(calculations, open(f'ots_count_{day}_{hour}_{minute}.p', 'wb'))
+					temp_time = datetime_INDIA.hour
 					# cv2.putText(frame, text, (x, y - 5),
 					# 	cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
+		# temp_time = datetime_INDIA.hour
+		# print(f"END: The temp time is {temp_time}")
 		totalFrames += 1
 		fps.update()
 	except Exception as ex:
@@ -206,7 +222,6 @@ while True:
 
 # stop the timer and display FPS information
 try:
-
 	fps.stop()
 	print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
 	print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
@@ -217,5 +232,5 @@ except Exception as ex:
         message = template.format(type(ex).__name__, ex.args)
         print (message)
 finally:
-	# writer.release()
+	print("There seems to be some problem with the feed")
 	vs.release()

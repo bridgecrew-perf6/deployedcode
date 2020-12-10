@@ -13,6 +13,7 @@ from collections import Counter
 from datetime import *
 import pytz 
 import pickle
+import subprocess
 
 
 args = {}
@@ -33,7 +34,6 @@ weightsPath = "model.weights"
 
 calculations = {}
 calculations_hour = {}
-calculations_minute = {}
 
 # load the COCO class labels our YOLO model was trained on
 LABELS = ['person','bicycle','car','motorbike','aeroplane','bus','train','truck','boat','traffic light','fire hydrant','stop sign','parking meter', 'bench','bird',
@@ -61,7 +61,7 @@ ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
 # vs = cv2.VideoCapture("test_day.avi")
 
 vs = cv2.VideoCapture()
-vs.open("rtsp://admin:Roshan1892@123.231.113.91:554/Streaming/channels/101")
+vs.open("rtsp://admin:admin123@123.231.62.102:554/Streaming/channels/101")
 
 
 writer = None
@@ -85,7 +85,6 @@ except:
 fps = FPS().start()
 data = []
 
-
 temp_time = 1
 
 tz_INDIA = pytz.timezone('Asia/Kolkata')
@@ -98,7 +97,7 @@ minute = date_data.minute
 # loop over frames from the video file stream
 while True:
 
-	tz_INDIA = pytz.timezone('Asia/Kolkata')  
+	# tz_INDIA = pytz.timezone('Asia/Kolkata')  
 	datetime_INDIA = datetime.now(tz_INDIA) 
 	if (datetime_INDIA.year == 2021) and (datetime_INDIA.month == 12):
 		print(f"Your license period has expired")
@@ -114,18 +113,11 @@ while True:
 		# read the next frame from the file
 		(grabbed, frame) = vs.read()
 
-		# tz_INDIA = pytz.timezone('Asia/Kolkata')  
-		# datetime_INDIA = datetime.now(tz_INDIA) 
-		# # print(f"The date in India is {datetime_INDIA.minute}")
-
-		# if (datetime_INDIA.year == 2021) and (datetime_INDIA.month == 12):
-		# 	print(f"Your license period has expired")
-		# 	break 
-
 		# if the frame was not grabbed, then we have reached the end
-		# of the stream
+		# of the stream. Continue the program for the next iteration.
 		if not grabbed:
-			break
+			print(f"There is no grabbing of frames")
+			continue
 
 		# if the frame dimensions are empty, grab them
 		if W is None or H is None:
@@ -242,5 +234,5 @@ except Exception as ex:
         message = template.format(type(ex).__name__, ex.args)
         print (message)
 finally:
-	# writer.release()
+	print("There seems to be some problem with the feed")
 	vs.release()
