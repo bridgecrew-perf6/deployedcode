@@ -1,0 +1,7 @@
+locad/dist
+locad/build
+*.cfg
+*.weights
+*.p
+__pycache__
+
